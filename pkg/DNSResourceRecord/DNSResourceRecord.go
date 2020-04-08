@@ -23,7 +23,7 @@ type ResourceRecord struct {
 	NAME     string
 	TYPE     RRType
 	CLASS    RRClass
-	TTL      int32
+	TTL      uint32
 	RDLENGTH uint16
 	RDATA    string
 }
