@@ -1,4 +1,4 @@
-package config
+package pDNSconfig
 
 import (
 	"fmt"

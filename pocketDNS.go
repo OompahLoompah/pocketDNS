@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 
-	c "github.com/OompahLoompah/pocketDNS/internal/config"
+	"github.com/OompahLoompah/pocketDNS/internal/pDNSconfig"
 	dns "github.com/OompahLoompah/pocketDNS/pkg/DNSResourceRecord"
 	"github.com/OompahLoompah/pocketDNS/pkg/listener"
 )
 
-
-func parseRecords(domains map[string]c.Domain) *map[string]dns.ResourceRecord {
+func parseRecords(domains map[string]pDNSconfig.Domain) *map[string]dns.ResourceRecord {
 	records := make(map[string]dns.ResourceRecord)
 	for n, d := range domains {
 		for _, r := range d.Records {
@@ -29,7 +28,7 @@ func parseRecords(domains map[string]c.Domain) *map[string]dns.ResourceRecord {
 }
 
 func main() {
-	conf, err := c.Config()
+	conf, err := pDNSconfig.Config()
 	if err != nil {
 		fmt.Println(err)
 		panic("Unable to parse config")
