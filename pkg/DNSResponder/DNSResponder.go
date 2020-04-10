@@ -1,8 +1,9 @@
 package dnsresponder
 
 import (
-	"fmt"
 	"net"
+
+	log "github.com/Sirupsen/logrus"
 
 	//TODO: Remove dependency on gopacket
 	"github.com/google/gopacket/layers"
@@ -29,8 +30,7 @@ func (d *ResponderConfig) RequestAnswer(request *layers.DNS) *layers.DNS {
 		case layers.DNSTypeA:
 			record, ok := d.ARecords[string(request.Questions[0].Name)]
 			if !ok {
-				fmt.Println("I'm not okay with this!")
-				//TODO: Log no data present for the IP
+				log.Debug("Got request for A record of unknown domain: " + string(request.Questions[0].Name))
 			} else {
 				addr := net.ParseIP(record.RDATA)
 				dnsAnswer := layers.DNSResourceRecord{

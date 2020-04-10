@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/OompahLoompah/pocketDNS/internal/pDNSconfig"
 	dns "github.com/OompahLoompah/pocketDNS/pkg/DNSResourceRecord"
@@ -28,10 +28,13 @@ func parseRecords(domains map[string]pDNSconfig.Domain) *map[string]dns.Resource
 }
 
 func main() {
-	conf, err := pDNSconfig.Config()
-	if err != nil {
-		fmt.Println(err)
-		panic("Unable to parse config")
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(log.DebugLevel)
+	log.Print("pocketDNS Starting...")
+	conf := pDNSconfig.Config()
+	for k, v := range conf.Domains {
+		log.Debug(k)
+		log.Debug(v)
 	}
 	d := parseRecords(conf.Domains)
 	l := listener.UDPListener{
