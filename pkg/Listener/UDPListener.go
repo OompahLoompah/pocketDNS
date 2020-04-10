@@ -1,8 +1,9 @@
 package listener
 
 import (
-	"fmt"
 	"net"
+
+	log "github.com/Sirupsen/logrus"
 
 	//TODO: Remove dependency on gopacket
 	"github.com/google/gopacket"
@@ -45,7 +46,7 @@ func (l *UDPListener) Listen() {
 	}
 	u, err := net.ListenUDP("udp", addr)
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 	}
 
 	//TODO: QUESTION: How do golang's contexts work? I know we'll need to support parallel requests and afaict we'll need to use contexts in some way.
@@ -55,7 +56,7 @@ func (l *UDPListener) Listen() {
 		n, addr, err := u.ReadFrom(b)
 		b = b[:n] // Hack to prevent packet decoding from failing
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 		}
 		clientAddr := addr
 		packet := gopacket.NewPacket(b, layers.LayerTypeDNS, gopacket.Default)
@@ -66,7 +67,7 @@ func (l *UDPListener) Listen() {
 		o := gopacket.SerializeOptions{} // See SerializeOptions for more details.
 		err = answer.SerializeTo(buf, o)
 		if err != nil {
-			fmt.Println("Error writing to buffer")
+			log.Error("Error writing to buffer") //TODO improve this to handle request tracing
 		}
 		u.WriteTo(buf.Bytes(), clientAddr)
 	}

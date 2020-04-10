@@ -1,8 +1,9 @@
 package pDNSconfig
 
 import (
-	"fmt"
 	"os"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/spf13/viper"
 )
@@ -25,8 +26,7 @@ type Configuration struct {
 func loadConfig() {
 	p, err := os.UserHomeDir()
 	if err != nil {
-		fmt.Println("Unable to get user's home directory, unable to parse any ",
-			"config file in $HOME/.homeDNS") //TODO: send this to logger instead of Println
+		log.Warn("Unable to get user's home directory, skipping user's config")
 	}
 	viper.SetConfigName("config")
 	viper.SetConfigType("json")
@@ -39,17 +39,17 @@ func loadConfig() {
 	viper.AddConfigPath("/etc/appname/")
 	err = viper.ReadInConfig() // Find and read the config file
 	if err != nil {            // Handle errors reading the config file
-		fmt.Println("Unable to find config file")
+		log.Fatal("Unable to find any config file")
 	}
 }
 
 var C Configuration
 
-func Config() (*Configuration, error) {
+func Config() *Configuration {
 	loadConfig()
 	err := viper.Unmarshal(&C)
 	if err != nil {
-		return nil, err
+		log.Fatal("Failed unmarshalling the config: " + err.Error())
 	}
-	return &C, nil
+	return &C
 }
