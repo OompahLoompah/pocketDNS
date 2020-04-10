@@ -8,9 +8,6 @@ import (
 	"github.com/OompahLoompah/pocketDNS/pkg/listener"
 )
 
-type config struct {
-	Domains []dns.ResourceRecord
-}
 
 func parseRecords(domains map[string]c.Domain) *map[string]dns.ResourceRecord {
 	records := make(map[string]dns.ResourceRecord)
