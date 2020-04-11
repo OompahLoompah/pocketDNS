@@ -3,7 +3,7 @@ package dnsresponder
 import (
 	"net"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	//TODO: Remove dependency on gopacket
 	"github.com/google/gopacket/layers"

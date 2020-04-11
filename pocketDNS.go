@@ -1,11 +1,11 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/OompahLoompah/pocketDNS/internal/pDNSconfig"
 	dns "github.com/OompahLoompah/pocketDNS/pkg/DNSResourceRecord"
-	"github.com/OompahLoompah/pocketDNS/pkg/listener"
+	listener "github.com/OompahLoompah/pocketDNS/pkg/Listener"
 )
 
 func parseRecords(domains map[string]pDNSconfig.Domain) *map[string]dns.ResourceRecord {
