@@ -22,6 +22,20 @@ type UDPListener struct {
 	Factory *dns.ResponseFactory
 }
 
+func (l *UDPListener) respond(b []byte, addr net.Addr, conn *net.UDPConn) {
+	packet := gopacket.NewPacket(b, layers.LayerTypeDNS, gopacket.Default)
+	dnsPacket := packet.Layer(layers.LayerTypeDNS)
+	tcp, _ := dnsPacket.(*layers.DNS)
+	answer := l.Factory.BuildResponse(tcp)
+	buf := gopacket.NewSerializeBuffer()
+	o := gopacket.SerializeOptions{} // See SerializeOptions for more details.
+	err := answer.SerializeTo(buf, o)
+	if err != nil {
+		log.Error("Error writing to buffer") //TODO improve this to handle request tracing
+	}
+	conn.WriteTo(buf.Bytes(), addr)
+}
+
 // Listen takes a list of dns.ResourceRecords to listen for and returns nothing
 func (l *UDPListener) Listen() {
 	// Get all of our mise en place before we do any network setup
@@ -52,22 +66,11 @@ func (l *UDPListener) Listen() {
 
 	for {
 		b := make([]byte, 1024)
-		n, addr, err := u.ReadFrom(b)
+		n, cAddr, err := u.ReadFrom(b)
 		b = b[:n] // Hack to prevent packet decoding from failing
 		if err != nil {
 			log.Error(err)
 		}
-		clientAddr := addr
-		packet := gopacket.NewPacket(b, layers.LayerTypeDNS, gopacket.Default)
-		dnsPacket := packet.Layer(layers.LayerTypeDNS)
-		tcp, _ := dnsPacket.(*layers.DNS)
-		answer := l.Factory.BuildResponse(tcp)
-		buf := gopacket.NewSerializeBuffer()
-		o := gopacket.SerializeOptions{} // See SerializeOptions for more details.
-		err = answer.SerializeTo(buf, o)
-		if err != nil {
-			log.Error("Error writing to buffer") //TODO improve this to handle request tracing
-		}
-		u.WriteTo(buf.Bytes(), clientAddr)
+		go l.respond(b, cAddr, u)
 	}
 }
