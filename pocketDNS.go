@@ -4,11 +4,11 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/OompahLoompah/pocketDNS/internal/pDNSconfig"
-	dns "github.com/OompahLoompah/pocketDNS/pkg/DNSResourceRecord"
+	dns "github.com/OompahLoompah/pocketDNS/pkg/DNS"
 	listener "github.com/OompahLoompah/pocketDNS/pkg/Listener"
 )
 
-func parseRecords(domains map[string]pDNSconfig.Domain) *map[string]dns.ResourceRecord {
+func parseRecords(domains map[string]pDNSconfig.Domain) map[string]dns.ResourceRecord {
 	records := make(map[string]dns.ResourceRecord)
 	for n, d := range domains {
 		for _, r := range d.Records {
@@ -24,7 +24,7 @@ func parseRecords(domains map[string]pDNSconfig.Domain) *map[string]dns.Resource
 			}
 		}
 	}
-	return &records
+	return records
 }
 
 func main() {
@@ -37,10 +37,13 @@ func main() {
 		log.Debug(v)
 	}
 	d := parseRecords(conf.Domains)
+	f := &dns.ResponseFactory{
+		ARecords: d,
+	}
 	l := listener.UDPListener{
 		IP:      "127.0.0.1",
 		Port:    53,
-		Records: *d,
+		Factory: f,
 	}
 	l.Listen()
 }

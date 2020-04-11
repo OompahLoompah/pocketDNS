@@ -9,8 +9,7 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 
-	dns "github.com/OompahLoompah/pocketDNS/pkg/DNSResourceRecord"
-	responder "github.com/OompahLoompah/pocketDNS/pkg/DNSResponder"
+	dns "github.com/OompahLoompah/pocketDNS/pkg/DNS"
 )
 
 // UDPListener defines a UDPListener with IP, Port, and a map of DNS records.
@@ -20,7 +19,7 @@ import (
 type UDPListener struct {
 	IP      string
 	Port    int
-	Records map[string]dns.ResourceRecord
+	Factory *dns.ResponseFactory
 }
 
 // Listen takes a list of dns.ResourceRecords to listen for and returns nothing
@@ -28,10 +27,10 @@ func (l *UDPListener) Listen() {
 	// Get all of our mise en place before we do any network setup
 	// For now we only support A records so as a (very) dirty shortcut assume
 	//   all records are A records.
-	r := &responder.ResponderConfig{
-		ARecords: l.Records,
-	}
 
+	if l.Factory == nil {
+		log.Fatal("No response factory provided")
+	}
 	if l.IP == "" {
 		l.IP = "127.0.0.1"
 	}
@@ -62,7 +61,7 @@ func (l *UDPListener) Listen() {
 		packet := gopacket.NewPacket(b, layers.LayerTypeDNS, gopacket.Default)
 		dnsPacket := packet.Layer(layers.LayerTypeDNS)
 		tcp, _ := dnsPacket.(*layers.DNS)
-		answer := r.RequestAnswer(tcp)
+		answer := l.Factory.BuildResponse(tcp)
 		buf := gopacket.NewSerializeBuffer()
 		o := gopacket.SerializeOptions{} // See SerializeOptions for more details.
 		err = answer.SerializeTo(buf, o)
