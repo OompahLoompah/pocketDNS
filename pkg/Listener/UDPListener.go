@@ -68,10 +68,10 @@ func (l *UDPListener) Listen() error {
 	for {
 		b := make([]byte, 1024)
 		n, cAddr, err := u.ReadFrom(b)
-		b = b[:n] // Trim slice so packet decoding won't fail
 		if err != nil {
 			log.Error(err)
 		}
+		b = b[:n] // Trim slice so packet decoding won't fail
 		go l.respond(b, cAddr, u)
 	}
 }
