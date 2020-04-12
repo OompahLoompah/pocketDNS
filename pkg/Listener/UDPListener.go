@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"errors"
 	"net"
 
 	log "github.com/sirupsen/logrus"
@@ -20,6 +21,17 @@ type UDPListener struct {
 	IP      string
 	Port    int
 	Factory *dns.ResponseFactory
+}
+
+// New builds and returns a new UDPListener. This function enforces the
+// existence of required struct members and is considered the safe way
+// to create UDPListeners.
+func New(ip string, port int, factory *dns.ResponseFactory) *UDPListener {
+	return &UDPListener{
+		IP:      ip,
+		Port:    port,
+		Factory: factory,
+	}
 }
 
 // respond is an internal helper function to handle the construction and
@@ -42,34 +54,29 @@ func (l *UDPListener) respond(b []byte, addr net.Addr, conn *net.UDPConn) {
 // receiving packets, will hand them off to the respond() function as a new
 // goroutine. Returns nothing and on error should log it and return the
 // appropriate error message to the query sender if possible.
-func (l *UDPListener) Listen() {
-
+func (l *UDPListener) Listen() error {
 	if l.Factory == nil {
-		log.Fatal("No response factory provided")
+		// We treat nil factories as an error, otherwise UDPListener wouldn't be
+		// able to respond to queries.
+		return errors.New("Missing ResponseFactory")
 	}
-	if l.IP == "" {
-		l.IP = "127.0.0.1"
-	}
-	if l.Port == 0 {
-		l.Port = 53
-	}
-
 	addr := &net.UDPAddr{
 		Port: l.Port,
 		IP:   net.ParseIP(l.IP),
 	}
+	log.Info("Now listening on " + addr.String())
 	u, err := net.ListenUDP("udp", addr)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
 
 	for {
 		b := make([]byte, 1024)
 		n, cAddr, err := u.ReadFrom(b)
-		b = b[:n] // Trim slice so packet decoding won't fail
 		if err != nil {
 			log.Error(err)
 		}
+		b = b[:n] // Trim slice so packet decoding won't fail
 		go l.respond(b, cAddr, u)
 	}
 }

@@ -41,10 +41,9 @@ func main() {
 	f := &dns.ResponseFactory{
 		ARecords: d,
 	}
-	l := listener.UDPListener{
-		IP:      "127.0.0.1",
-		Port:    53,
-		Factory: f,
+	l := listener.New("127.0.0.1", 53, f)
+	err := l.Listen()
+	if err != nil {
+		log.Fatal(err)
 	}
-	l.Listen()
 }
