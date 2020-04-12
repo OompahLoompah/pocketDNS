@@ -59,6 +59,7 @@ func (l *UDPListener) Listen() error {
 		Port: l.Port,
 		IP:   net.ParseIP(l.IP),
 	}
+	log.Info("Now listening on " + addr.String())
 	u, err := net.ListenUDP("udp", addr)
 	if err != nil {
 		return err
