@@ -1,6 +1,7 @@
 package listener
 
 import (
+	"errors"
 	"net"
 
 	log "github.com/sirupsen/logrus"
@@ -42,10 +43,10 @@ func (l *UDPListener) respond(b []byte, addr net.Addr, conn *net.UDPConn) {
 // receiving packets, will hand them off to the respond() function as a new
 // goroutine. Returns nothing and on error should log it and return the
 // appropriate error message to the query sender if possible.
-func (l *UDPListener) Listen() {
+func (l *UDPListener) Listen() error {
 
 	if l.Factory == nil {
-		log.Fatal("No response factory provided")
+		return errors.New("UDPlistener is missing a response factory")
 	}
 	if l.IP == "" {
 		l.IP = "127.0.0.1"
@@ -60,7 +61,7 @@ func (l *UDPListener) Listen() {
 	}
 	u, err := net.ListenUDP("udp", addr)
 	if err != nil {
-		log.Error(err)
+		return err
 	}
 
 	for {

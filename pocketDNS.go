@@ -46,5 +46,8 @@ func main() {
 		Port:    53,
 		Factory: f,
 	}
-	l.Listen()
+	err := l.Listen()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
