@@ -23,6 +23,17 @@ type UDPListener struct {
 	Factory *dns.ResponseFactory
 }
 
+// New builds and returns a new UDPListener. This function enforces the
+// existence of required struct members and is considered the safe way
+// to create UDPListeners.
+func New(ip string, port int, factory *dns.ResponseFactory) *UDPListener {
+	return &UDPListener{
+		IP:      ip,
+		Port:    port,
+		Factory: factory,
+	}
+}
+
 // respond is an internal helper function to handle the construction and
 // transmission of answers to individual queries.
 func (l *UDPListener) respond(b []byte, addr net.Addr, conn *net.UDPConn) {
