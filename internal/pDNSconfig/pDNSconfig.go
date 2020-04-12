@@ -60,3 +60,4 @@ func Config() *Configuration {
 	}
 	return &C
 }
+
