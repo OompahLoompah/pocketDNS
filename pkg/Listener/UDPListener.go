@@ -55,17 +55,11 @@ func (l *UDPListener) respond(b []byte, addr net.Addr, conn *net.UDPConn) {
 // goroutine. Returns nothing and on error should log it and return the
 // appropriate error message to the query sender if possible.
 func (l *UDPListener) Listen() error {
-
 	if l.Factory == nil {
-		return errors.New("UDPlistener is missing a response factory")
+		// We treat nil factories as an error, otherwise UDPListener wouldn't be
+		// able to respond to queries.
+		return errors.New("Missing ResponseFactory")
 	}
-	if l.IP == "" {
-		l.IP = "127.0.0.1"
-	}
-	if l.Port == 0 {
-		l.Port = 53
-	}
-
 	addr := &net.UDPAddr{
 		Port: l.Port,
 		IP:   net.ParseIP(l.IP),
