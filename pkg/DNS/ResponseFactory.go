@@ -24,12 +24,12 @@ func (d *ResponseFactory) BuildResponse(request *layers.DNS) *layers.DNS {
 	replyMess.Additionals = nil
 	replyMess.ARCount = 0
 
-	for _, q := range request.Questions {
+	for i, q := range request.Questions {
 		switch q.Type {
 		case layers.DNSTypeA:
-			record, ok := d.ARecords[string(request.Questions[0].Name)]
+			record, ok := d.ARecords[string(request.Questions[i].Name)]
 			if !ok {
-				log.Debug("Got request for A record of unknown domain: " + string(request.Questions[0].Name))
+				log.Debug("Got request for A record of unknown domain: " + string(request.Questions[i].Name))
 			} else {
 				addr := net.ParseIP(record.RDATA)
 				dnsAnswer := layers.DNSResourceRecord{
