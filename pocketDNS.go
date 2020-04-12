@@ -3,12 +3,12 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/OompahLoompah/pocketDNS/internal/pDNSconfig"
+	"github.com/OompahLoompah/pocketDNS/internal/pdnsconfig"
 	dns "github.com/OompahLoompah/pocketDNS/pkg/DNS"
 	listener "github.com/OompahLoompah/pocketDNS/pkg/Listener"
 )
 
-func parseRecords(domains map[string]pDNSconfig.Domain) map[string]dns.ResourceRecord {
+func parseRecords(domains map[string]pdnsconfig.Domain) map[string]dns.ResourceRecord {
 	records := make(map[string]dns.ResourceRecord)
 	for n, d := range domains {
 		for _, r := range d.Records {
@@ -31,7 +31,8 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetLevel(log.DebugLevel)
 	log.Print("pocketDNS Starting...")
-	conf := pDNSconfig.Config()
+
+	conf := pdnsconfig.Config()
 	for k, v := range conf.Domains {
 		log.Debug(k)
 		log.Debug(v)

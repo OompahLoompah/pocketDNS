@@ -1,4 +1,4 @@
-package pDNSconfig
+package pdnsconfig
 
 import (
 	"os"
@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Record is an individual DNS resource record
 type Record struct {
 	Type  string
 	Class string
@@ -15,10 +16,13 @@ type Record struct {
 	RDATA string
 }
 
+// Domain is a struct containing all of the resource records associated with a
+// given domain or node.
 type Domain struct {
 	Records []Record
 }
 
+// Configuration is the top-level config struct for an instance of pocketDNS
 type Configuration struct {
 	Domains map[string]Domain
 }
@@ -43,9 +47,12 @@ func loadConfig() {
 	}
 }
 
-var C Configuration
-
+// Config takes no arguments and returns a pocketDNS *Configuration if
+// possible. On error, will log a Fatal error and quit since running the server
+// regardless would result in a DNS server with no records listening only to
+// queries from the localhost.
 func Config() *Configuration {
+	var C Configuration
 	loadConfig()
 	err := viper.Unmarshal(&C)
 	if err != nil {
@@ -53,3 +60,4 @@ func Config() *Configuration {
 	}
 	return &C
 }
+
