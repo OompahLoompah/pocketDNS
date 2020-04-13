@@ -41,11 +41,6 @@ func (l *UDPListener) respond(b []byte, addr net.Addr, conn *net.UDPConn) {
 	dnsPacket := packet.Layer(layers.LayerTypeDNS)
 	tcp, _ := dnsPacket.(*layers.DNS)
 	answer := l.Factory.BuildResponse(tcp)
-	if answer.ANCount == 0 {
-		//TODO: implement and use request tracing
-		log.Info("Unable to find any answer for request, ignoring query.")
-		return
-	}
 	buf := gopacket.NewSerializeBuffer()
 	o := gopacket.SerializeOptions{}
 	err := answer.SerializeTo(buf, o)

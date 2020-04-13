@@ -15,9 +15,13 @@ type ResponseFactory struct {
 }
 
 // BuildResponse takes a DNS query and builds and returns the correspondibg DNS
-// response.
+// response. On the first question that would result in a non-zero response code
+// BuildResponse sets the response code and immeadiately ceases processing
+// further questions to avoid ambiguous responses.
 func (d *ResponseFactory) BuildResponse(request *layers.DNS) *layers.DNS {
 	replyMess := request // Using the request as a starter for the response
+	replyMess.ResponseCode = layers.DNSResponseCodeNoErr
+	replyMess.QR = true // message is a response, not a query
 
 	// Additionals seems to sometimes have an empty element. We need to reset
 	// the additionals section as a result
@@ -29,7 +33,10 @@ func (d *ResponseFactory) BuildResponse(request *layers.DNS) *layers.DNS {
 		case layers.DNSTypeA:
 			record, ok := d.ARecords[string(request.Questions[i].Name)]
 			if !ok {
+				// treat failures to look up records as a server failure
 				log.Debug("Got request for A record of unknown domain: " + string(request.Questions[i].Name))
+				replyMess.ResponseCode = layers.DNSResponseCodeServFail
+				return replyMess
 			} else {
 				addr := net.ParseIP(record.RDATA)
 				dnsAnswer := layers.DNSResourceRecord{
@@ -42,9 +49,11 @@ func (d *ResponseFactory) BuildResponse(request *layers.DNS) *layers.DNS {
 				replyMess.Answers = append(replyMess.Answers, dnsAnswer)
 				replyMess.ANCount++
 			}
+		default:
+			log.Info("Received request for unimplemented query type")
+			replyMess.ResponseCode = layers.DNSResponseCodeNotImp
+			return replyMess
 		}
 	}
-	replyMess.QR = true // message is a response, not a query
-	replyMess.ResponseCode = layers.DNSResponseCodeNoErr
 	return replyMess
 }
