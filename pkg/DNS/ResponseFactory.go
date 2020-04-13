@@ -37,18 +37,17 @@ func (d *ResponseFactory) BuildResponse(request *layers.DNS) *layers.DNS {
 				log.Debug("Got request for A record of unknown domain: " + string(request.Questions[i].Name))
 				replyMess.ResponseCode = layers.DNSResponseCodeServFail
 				return replyMess
-			} else {
-				addr := net.ParseIP(record.RDATA)
-				dnsAnswer := layers.DNSResourceRecord{
-					Name:  request.Questions[0].Name,
-					Type:  layers.DNSTypeA,
-					Class: layers.DNSClassIN,
-					TTL:   record.TTL,
-					IP:    addr,
-				}
-				replyMess.Answers = append(replyMess.Answers, dnsAnswer)
-				replyMess.ANCount++
 			}
+			addr := net.ParseIP(record.RDATA)
+			dnsAnswer := layers.DNSResourceRecord{
+				Name:  request.Questions[0].Name,
+				Type:  layers.DNSTypeA,
+				Class: layers.DNSClassIN,
+				TTL:   record.TTL,
+				IP:    addr,
+			}
+			replyMess.Answers = append(replyMess.Answers, dnsAnswer)
+			replyMess.ANCount++
 		default:
 			log.Info("Received request for unimplemented query type")
 			replyMess.ResponseCode = layers.DNSResponseCodeNotImp
